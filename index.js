@@ -1,27 +1,37 @@
-const Curl = require('node-libcurl').Curl; // Import the Curl class from node-libcurl
+const Curl = require('node-libcurl').Curl;
 
-// Define the target URL
 const url = 'https://example.com';
 
-// Create a new Curl instance
 const curl = new Curl();
+curl.setOpt(Curl.option.URL, url);
 
-// Configure the request
-curl.setOpt(Curl.option.URL, url); // Set the URL to fetch
-curl.setOpt(Curl.option.WRITEDATA, ''); // Store the response in memory
-
-// Handle successful request completion
-curl.on('end', (statusCode, data) => {
-  console.log(`HTTP Status Code: ${statusCode}`); // Log the status (e.g., 200)
-  console.log(`Response from ${url}:\n\n${data.toString()}`); // Log the fetched content
-  curl.close(); // Release resources
+// Capture response headers and body
+let responseData = '';
+curl.on('header_function', (info) => {
+  // Process headers here if needed
+  return 0; // Continue processing
 });
 
-// Handle errors (e.g., network issues)
-curl.on('error', (err) => {
-  console.error(`Error: ${err.message}`); // Log the error details
+curl.on('write_header', (buf) => {
+  // Append header data (optional)
+  responseData += buf.toString();
+  return buf.length;
+});
+
+curl.on('write', (buf) => {
+  // Append body data
+  responseData += buf.toString();
+  return buf.length;
+});
+
+curl.on('end', () => {
+  console.log(`Response:\n${responseData}`);
   curl.close();
 });
 
-// Execute the request
+curl.on('error', (err) => {
+  console.error(`Error: ${err.message}`);
+  curl.close();
+});
+
 curl.perform();
