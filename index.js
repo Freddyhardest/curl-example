@@ -8,18 +8,15 @@ curl.setOpt(Curl.option.URL, url);
 // Capture response headers and body
 let responseData = '';
 curl.on('header_function', (info) => {
-  // Process headers (customize if needed)
   return 0; // Continue processing
 });
 
 curl.on('write_header', (buf) => {
-  // Append header data (optional)
   responseData += buf.toString();
   return buf.length;
 });
 
 curl.on('write', (buf) => {
-  // Append body data
   responseData += buf.toString();
   return buf.length;
 });
